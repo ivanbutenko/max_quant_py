@@ -8,8 +8,7 @@ def _parse_job(batch_name: str, row: str)->Dict[str, Any]:
     num, batch, command, arguments, wd = row
     arguments = [a.strip('"') for a in shlex.split(arguments)]
 
-    job_name = arguments[4]
-    job_name = re.sub(r'\W', '_', job_name)
+    job_name = re.sub(r'\W', '_', arguments[4])
     return {
         'command': command,
         'args': arguments,
