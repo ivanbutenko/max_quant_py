@@ -1,6 +1,7 @@
 import re
 import shlex
 from itertools import groupby
+from os.path import basename
 from typing import Iterable, Dict, List, Any
 
 
@@ -9,6 +10,11 @@ def _parse_job(batch_name: str, row: str)->Dict[str, Any]:
     arguments = [a.strip('"') for a in shlex.split(arguments)]
 
     job_name = re.sub(r'\W', '_', arguments[4])
+    wiff_file = next(
+        (arg for arg in arguments if arg.endswith('.wiff')), None
+    )
+    if wiff_file is not None:
+        job_name = basename(wiff_file)
     return {
         'command': command,
         'args': arguments,
