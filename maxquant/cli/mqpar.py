@@ -1,21 +1,16 @@
 import argparse
-import os
-from os.path import join, exists, abspath
+from os.path import abspath
 
-from maxquant.config import read_config
 from maxquant.mqpar import write_mqpar_config
 
 
 def main():
-    config = read_config()
-
-    # home = os.getenv('HOME')
     parser = argparse.ArgumentParser(
         prog='mqpar',
     )
     parser.add_argument('-o', '--output', required=True)
-    # parser.add_argument('-m', '--max-quant-template', default=join(home, '.max_quant', 'mqpar.base.xml'))
-    # parser.add_argument('-d', '--database', default=join(home, '.max_quant', 'database.fasta'))
+    parser.add_argument('-m', '--max-quant-template')
+    parser.add_argument('-d', '--database')
     parser.add_argument('-t', '--threads', default=1, type=int)
     parser.add_argument('files', nargs='+', help='*.wiff files')
 
@@ -27,10 +22,10 @@ def main():
     ]
 
     write_mqpar_config(
-        tpl_file=config['mqpar.template'],
+        tpl_file=args.max_quant_template,
         out_file=args.output,
         files=args.files,
-        database=config['database.fasta'],
+        database=args.database,
         threads=args.threads,
     )
 
