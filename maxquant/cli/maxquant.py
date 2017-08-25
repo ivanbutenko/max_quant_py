@@ -43,7 +43,7 @@ def main():
         for f in args.files
     ]
 
-    args.mqpar_output = abspath(args.mqpar_output)
+    args.mqpar_generated = abspath(args.mqpar_generated)
 
     write_mqpar_config(
         tpl_file=args.mqpar_template,
