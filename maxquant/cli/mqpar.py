@@ -9,8 +9,8 @@ def main():
         prog='mqpar',
     )
     parser.add_argument('-o', '--output', required=True)
-    parser.add_argument('-m', '--max-quant-template')
-    parser.add_argument('-d', '--database')
+    parser.add_argument('-m', '--max-quant-template', required=True)
+    parser.add_argument('-d', '--database', required=True)
     parser.add_argument('-t', '--threads', default=1, type=int)
     parser.add_argument('files', nargs='+', help='*.wiff files')
 
