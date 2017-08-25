@@ -25,9 +25,9 @@ export PATH=$HOME/.local/bin:$PATH
 ```bash
 $ ls -1
 data/  # directory with .wiff and .wiff.scan files 
-database.fasta@  # link to database 
-MaxQuant@  # link to MaxQuant distribution
-mqpar.base.xml@  # Link to mqpar base template
+database.fasta@  # link to database (<your software dir>/MaxQuant.16013.wiff_fix.cmd/database.fasta)
+MaxQuant@  # link to MaxQuant distribution (<your software dir>/MaxQuant.16013.wiff_fix.cmd)
+mqpar.base.xml@  # Link to mqpar base template (<your software dir>/MaxQuant.16013.wiff_fix.cmd/mqpar.base.xml)
 ```
 
 ## Getting help
