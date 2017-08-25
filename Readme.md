@@ -13,10 +13,12 @@ cd ..
 git clone https://github.com/lpenguin/simple_drmaa_scheduler
 cd simple_drmaa_scheduler
 pip3 install --user .
-
-# Add $HOME/.local/bin to $PATH
 ```
-
+### Add $HOME/.local/bin to $PATH
+```bash
+# Add line to the bottom of ~/.bash_profile
+export PATH=$HOME/.local/bin:$PATH
+```
 # Usage
 
 ## Directory structure
