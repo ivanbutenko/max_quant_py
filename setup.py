@@ -10,5 +10,5 @@ setup(name='maxquant',
               'maxquant-batch = maxquant.cli.batch:main',
               'maxquant-mqpar = maxquant.cli.mqpar:main',
           ]
-      }, install_requires=['PyYAML']
+      }, install_requires=['PyYAML', 'ujson']
       )

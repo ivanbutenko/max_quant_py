@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-import yaml
+import ujson as json
 
 from maxquant.batch import parse_batches
 from maxquant.config import read_config
@@ -28,7 +28,7 @@ def main():
     )
 
     batches = parse_batches(res)
-    yaml.dump(batches, sys.stdout, default_flow_style=None)
+    json.dump(batches, sys.stdout, indent=2)
 
 
 if __name__ == '__main__':
