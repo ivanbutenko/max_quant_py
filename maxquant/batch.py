@@ -45,7 +45,7 @@ def parse_batches(rows: Iterable[str], filepaths: List[str])->List[Dict]:
         for r in rows
     ]
     batches = [
-        _parse_batch(batch, group, filepaths)
+        _parse_batch(batch, list(group)
         for batch, group in groupby(rows, lambda r: r[1])
     ]
     return batches
