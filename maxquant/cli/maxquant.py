@@ -44,7 +44,7 @@ def main():
     ]
 
     args.mqpar_generated = abspath(args.mqpar_generated)
-
+    args.database = abspath(args.database)
     write_mqpar_config(
         tpl_file=args.mqpar_template,
         out_file=args.mqpar_generated,
