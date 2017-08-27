@@ -5,7 +5,7 @@ import sys
 import ujson as json
 from maxquant.batch import parse_batches
 from maxquant.maxquant import run_maxquant
-from maxquant.mqpar import write_mqpar_config
+from maxquant.mqpar import write_mqpar_config, read_mqpar_config
 
 
 def validate(args):
@@ -58,14 +58,15 @@ def main():
     else:
         custom_params = []
 
-    # config = read_config()
+    mqpar_config = read_mqpar_config(args.mqpar_generated)
+    filepaths = mqpar_config['filepaths']
 
     res = run_maxquant(
         max_quant_cmd=args.max_quant_cmd,
         options=['-c', args.mqpar_generated, '-D'] + custom_params
     )
 
-    batches = parse_batches(res)
+    batches = parse_batches(res, filepaths)
     json.dump(batches, sys.stdout, indent=2)
 
 

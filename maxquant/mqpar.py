@@ -1,5 +1,5 @@
 from os.path import basename
-from typing import List
+from typing import List, Any, Dict
 from xml.etree import ElementTree
 
 
@@ -31,3 +31,15 @@ def write_mqpar_config(tpl_file: str, out_file: str, files: List[str], threads: 
     add_strings('fastaFiles', [database], node_type='string')
 
     tree.write(out_file)
+
+
+def read_mqpar_config(filename: str)->Dict[str, Any]:
+    tree = ElementTree.parse(filename)
+    filepaths_elems = tree.getroot().find('filePaths').findall('string')
+    filepaths = [
+        e.text
+        for e in filepaths_elems
+    ]
+    return {
+        'filepaths': filepaths,
+    }
