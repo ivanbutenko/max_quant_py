@@ -3,6 +3,8 @@ from os.path import abspath, exists
 
 import sys
 import ujson as json
+
+from maxquant import const
 from maxquant.batch import parse_batches
 from maxquant.maxquant import run_maxquant
 from maxquant.mqpar import write_mqpar_config, read_mqpar_config
@@ -67,6 +69,13 @@ def main():
     )
 
     batches = parse_batches(res, filepaths)
+
+    # Hackery hack for single jobs with multicore support
+    for b in batches:
+        if b['name'] in const.SINGLE_MULTICORE_BATCHES:
+            for j in b['jobs']:
+                sys.stderr.write('Patching threads for job {name}\n'.format(name=j['name']))
+                j['params'] = {'num_slots': args.threads}
     json.dump(batches, sys.stdout, indent=2)
 
 
