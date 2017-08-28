@@ -36,6 +36,7 @@ def main():
     parser.add_argument('-t', '--threads', default=1, type=int, help='Num of threads, do not use on cluster')
     parser.add_argument('-C', '--max-quant-cmd', default='MaxQuant/bin/CommandLine.exe', help='MaxQuant Commandline.exe binary')
     parser.add_argument('-p', '--custom-params')
+    parser.add_argument('-o', '--output', help='Output file, default is stdout')
     parser.add_argument('files', nargs='+', help='*.wiff files')
 
     args = parser.parse_args()
@@ -76,7 +77,15 @@ def main():
             for j in b['jobs']:
                 sys.stderr.write('Patching threads for job {name}\n'.format(name=j['name']))
                 j['params'] = {'num_slots': args.threads}
-    json.dump(batches, sys.stdout, indent=2)
+
+    if args.output:
+        f = open(args.output, 'w')
+    else:
+        f = sys.stdout
+
+    json.dump(batches, f, indent=2)
+    if f is not sys.stdout:
+        f.close()
 
 
 if __name__ == '__main__':
