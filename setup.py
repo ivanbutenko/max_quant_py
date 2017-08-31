@@ -4,7 +4,7 @@ setup(name='maxquant',
       packages=['maxquant',
                 'maxquant.cli',
                 ],
-      version='0.0.3',
+      version='0.0.4',
       entry_points={
           'console_scripts': [
               'maxquant = maxquant.cli.maxquant:main',
