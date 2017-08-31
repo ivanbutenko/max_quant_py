@@ -15,4 +15,4 @@ SINGLE_MULTICORE_BATCHES = {'CombineFiles',
                             'DependentPeptideApplyFdr',
                             'DependentCalculator',
                             'LfqNorm',
-                            'LfqCollect'}
+                            }
