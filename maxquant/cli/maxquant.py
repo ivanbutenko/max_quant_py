@@ -72,11 +72,12 @@ def main():
     batches = parse_batches(res, filepaths)
 
     # Hackery hack for single jobs with multicore support
-    for b in batches:
-        if b['name'] in const.SINGLE_MULTICORE_BATCHES:
-            for j in b['jobs']:
-                sys.stderr.write('Patching threads for job {name}\n'.format(name=j['name']))
-                j['params'] = {'num_slots': args.threads}
+    if args.threads > 1:
+        for b in batches:
+            if b['name'] in const.SINGLE_MULTICORE_BATCHES:
+                for j in b['jobs']:
+                    sys.stderr.write('Patching threads={threads} for job {name}\n'.format(name=j['name'], threads=args.threads))
+                    j['params'] = {'num_slots': args.threads}
 
     if args.output:
         f = open(args.output, 'w')
