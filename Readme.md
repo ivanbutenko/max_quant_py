@@ -71,7 +71,7 @@ maxquant-mqpar -t 20 data/*.wiff
 ## Generating `batch.json` with `maxquant-batch`
 ### Getting help
 ```bash
-$ maxquant-batch -h                                                                                                                                                                     13:04:57
+$ maxquant-batch -h
 usage: maxquant-batch [-h] [-c MQPAR] [-C MAX_QUANT_CMD] [-p CUSTOM_PARAMS]
                       [-o OUTPUT]
 
@@ -88,7 +88,7 @@ optional arguments:
 ```
 ### Generating `batch.json`
 ```bash
-maxquant-batch -o batch.json                                                                                                  13:08:06
+maxquant-batch -o batch.json
 Patching threads=20 for job ...
 Patching threads=20 for job ...
 ```
