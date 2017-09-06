@@ -4,10 +4,11 @@ setup(name='maxquant',
       packages=['maxquant',
                 'maxquant.cli',
                 ],
-      version='0.0.4',
+      version='0.0.5',
       entry_points={
           'console_scripts': [
-              'maxquant = maxquant.cli.maxquant:main',
+              'maxquant-batch = maxquant.cli.maxquant_batch:main',
+              'maxquant-mqpar = maxquant.cli.maxquant_mqpar:main',
           ]
       }, install_requires=['ujson']
       )

@@ -35,11 +35,18 @@ def write_mqpar_config(tpl_file: str, out_file: str, files: List[str], threads: 
 
 def read_mqpar_config(filename: str)->Dict[str, Any]:
     tree = ElementTree.parse(filename)
-    filepaths_elems = tree.getroot().find('filePaths').findall('string')
+    root = tree.getroot()
+
     filepaths = [
         e.text
-        for e in filepaths_elems
+        for e in root.find('filePaths').findall('string')
     ]
+
+    threads = int(root.find('numThreads').text)
+    database = root.find('fastaFiles').find('string').text
+
     return {
         'filepaths': filepaths,
+        'threads': threads,
+        'database': database,
     }
