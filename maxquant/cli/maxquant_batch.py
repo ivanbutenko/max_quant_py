@@ -9,6 +9,7 @@ from maxquant.batch import parse_batches
 from maxquant.cli.misc import print_and_exit
 from maxquant.maxquant import run_maxquant
 from maxquant.mqpar import read_mqpar_config
+from maxquant import version
 
 
 def validate_args(args):
@@ -37,6 +38,7 @@ def main():
     parser.add_argument('-C', '--max-quant-cmd', default='MaxQuant/bin/CommandLine.exe', help='MaxQuant Commandline.exe binary')
     parser.add_argument('-p', '--custom-params')
     parser.add_argument('-o', '--output', help='Output file, default is stdout')
+    parser.add_argument('--version', '-V', action='version', version="%(prog)s " + version.get_version())
 
     args = parser.parse_args()
     validate_args(args)

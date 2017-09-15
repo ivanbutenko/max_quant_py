@@ -1,6 +1,7 @@
 import argparse
 from os.path import abspath, exists
 
+from maxquant import version
 from maxquant.cli.misc import print_and_exit
 from maxquant.mqpar import write_mqpar_config
 
@@ -26,6 +27,7 @@ def main():
     parser.add_argument('-d', '--database', default='database.fasta', help='FASTA Database')
     parser.add_argument('-t', '--threads', default=1, type=int, help='Num of threads')
     parser.add_argument('-o', '--output', help='Output mqpar file', default='mqpar.gen.xml')
+    parser.add_argument('--version', '-V', action='version', version="%(prog)s " + version.get_version())
 
     parser.add_argument('files', nargs='+', help='*.wiff files')
 
