@@ -35,7 +35,8 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('-c', '--mqpar', help='mqpar.xml path', default='mqpar.gen.xml')
-    parser.add_argument('-C', '--max-quant-cmd', default='MaxQuant/bin/CommandLine.exe', help='MaxQuant Commandline.exe binary')
+    parser.add_argument('-C', '--max-quant-cmd', default='MaxQuant/bin/CommandLine.exe',
+                        help='MaxQuant Commandline.exe binary')
     parser.add_argument('-p', '--custom-params')
     parser.add_argument('-o', '--output', help='Output file, default is stdout')
     parser.add_argument('--version', '-V', action='version', version="%(prog)s " + version.get_version())
