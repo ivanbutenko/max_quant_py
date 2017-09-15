@@ -3,9 +3,7 @@ import shlex
 from collections import defaultdict, Counter
 from itertools import groupby, zip_longest
 from os.path import basename
-from typing import Iterable, Dict, List, Any
-
-from traitlets import Set
+from typing import Iterable, Dict, List, Any, Set
 
 
 class MaxQuantParser:
@@ -13,7 +11,8 @@ class MaxQuantParser:
         self.batches_count = defaultdict(int)
         self.batches_with_non_uniq_names = None  # type: Set
 
-    def _parse_job(self, batch_name: str, row: str, job_name: str) -> Dict[str, Any]:
+    @staticmethod
+    def _parse_job(batch_name: str, row: str, job_name: str) -> Dict[str, Any]:
         num, batch, command, arguments, wd = row
         arguments = [a.strip('"') for a in shlex.split(arguments)]
 
