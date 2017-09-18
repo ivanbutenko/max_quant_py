@@ -39,7 +39,7 @@ class MaxQuantParser:
         else:
             names = tuple()
 
-        batch_name = '{:02d}-{}'.format(batch_number + 1, batch_name)
+        batch_name = '{0:02d}-{}'.format(batch_number + 1, batch_name)
 
         jobs = [
             self._parse_job(batch_name, row, name)
