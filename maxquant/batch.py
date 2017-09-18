@@ -5,13 +5,17 @@ from itertools import groupby, zip_longest
 from os.path import basename
 from typing import Iterable, Dict, List, Any
 
+from const import BATCHES_WITH_FILENAME_BINDING
 from traitlets import Set
 
 
 class MaxQuantParser:
-    def __init__(self):
-        self.batches_count = defaultdict(int)
-        self.batches_with_non_uniq_names = None  # type: Set
+    def __init__(self, file_paths: List[str]):
+        self.file_paths = file_paths
+
+    # def __init__(self):
+        # self.batches_count = defaultdict(int)
+        # self.batches_with_non_uniq_names = None  # type: Set
 
     def _parse_job(self, batch_name: str, row: str, job_name: str) -> Dict[str, Any]:
         num, batch, command, arguments, wd = row
@@ -28,22 +32,19 @@ class MaxQuantParser:
 
         return job
 
-    def _parse_batch(self, name: str, rows: List[str], filepaths: List[str]) -> Dict[str, Any]:
+    def _parse_batch(self, batch_number: int, name: str, rows: List[str]) -> Dict[str, Any]:
         batch_name = name.split('.')[-1]
 
-        if name in self.batches_with_non_uniq_names:
-            count = self.batches_count[name]
-            batch_name = '{}-{}'.format(batch_name, count + 1)
-            self.batches_count[name] += 1
-
         # TODO: fix this
-        if len(rows) == len(filepaths):
+        if len(rows) == len(self.file_paths):
             names = [
                 basename(f)
-                for f in filepaths
+                for f in self.file_paths
             ]
         else:
             names = tuple()
+
+        batch_name = '{}-{}'.format(batch_number, batch_name)
 
         jobs = [
             self._parse_job(batch_name, row, name)
@@ -54,30 +55,20 @@ class MaxQuantParser:
             'jobs': jobs,
         }
 
-    def parse_batches(self, rows: Iterable[str], filepaths: List[str]) -> List[Dict]:
+    def parse_batches(self, rows: Iterable[str]) -> List[Dict]:
         rows = [
             r.split('\t')
             for r in rows
         ]
 
-        c = Counter(
-            batch for batch, group in groupby(rows, lambda r: r[1])
-        )
-
-        self.batches_with_non_uniq_names = {
-            batch
-            for batch, count in c.items()
-            if count > 1
-        }
-
         batches = [
-            self._parse_batch(batch, list(group), filepaths)
-            for batch, group in groupby(rows, lambda r: r[1])
+            self._parse_batch(i, batch, list(group))
+            for i, (batch, group) in enumerate(groupby(rows, lambda r: r[1]))
         ]
         return batches
 
 
 def parse_batches(rows: Iterable[str], filepaths: List[str]) -> List[Dict]:
-    return MaxQuantParser().parse_batches(rows, filepaths)
+    return MaxQuantParser(filepaths).parse_batches(rows)
 
 
