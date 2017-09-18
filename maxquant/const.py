@@ -16,3 +16,10 @@ SINGLE_MULTICORE_BATCHES = {'CombineFiles',
                             'DependentCalculator',
                             'LfqNorm',
                             }
+
+BATCHES_WITH_FILENAME_BINDING = {
+    'RawFileTester',
+    'FeatureDetection',
+    'CalcPeakProperties',
+}
+

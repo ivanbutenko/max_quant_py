@@ -4,6 +4,8 @@ from itertools import groupby, zip_longest
 from os.path import basename
 from typing import Iterable, Dict, List, Any
 
+import const
+
 
 class MaxQuantParser:
     def __init__(self, file_paths: List[str]):
@@ -29,7 +31,7 @@ class MaxQuantParser:
         batch_name = name.split('.')[-1]
 
         # TODO: fix this
-        if len(rows) == len(self.file_paths):
+        if batch_name in const.BATCHES_WITH_FILENAME_BINDING:
             names = [
                 basename(f)
                 for f in self.file_paths
