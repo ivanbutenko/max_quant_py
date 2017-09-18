@@ -66,7 +66,9 @@ def main():
     # Hackery hack for single jobs with multicore support
     if mqpar_config['threads'] > 1:
         for b in batches:
-            if b['name'] in const.SINGLE_MULTICORE_BATCHES:
+            # TODO: Refactor this
+            bname = '-'.join(b['name'].split('-')[1:])
+            if bname in const.SINGLE_MULTICORE_BATCHES:
                 for j in b['jobs']:
                     sys.stderr.write('Patching threads={threads} for job {name}\n'.format(
                         name=j['name'],
