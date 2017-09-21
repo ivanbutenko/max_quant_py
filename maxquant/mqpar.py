@@ -1,4 +1,5 @@
-from os.path import basename
+import datetime
+from os.path import basename, realpath
 from typing import List, Any, Dict
 from xml.etree import ElementTree
 
@@ -15,19 +16,20 @@ def write_mqpar_config(tpl_file: str, out_file: str, files: List[str], threads: 
             node.append(e)
 
     tree = ElementTree.parse(tpl_file)
+
+    comment = ElementTree.Comment('Created at {date}, base mqpar: {base_mqpar}'.format(
+        base_mqpar=realpath(tpl_file),
+        date=datetime.datetime.now(),
+    ))
+    tree.getroot().insert(0, comment)
     tree.find('numThreads').text = str(threads)
-
     add_strings('filePaths', files)
-
     add_strings('experiments', [
         basename(f)
         for f in files
     ])
-
     add_strings('fractions', [32767]*len(files), node_type='short')
-
     add_strings('paramGroupIndices', [0]*len(files), node_type='int')
-
     add_strings('fastaFiles', [database], node_type='string')
 
     tree.write(out_file)
