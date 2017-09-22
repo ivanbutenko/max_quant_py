@@ -1,16 +1,15 @@
 import argparse
 import sys
-import ujson as json
 from os.path import abspath, exists
 from typing import Dict, Any
 
-from maxquant import const
 from maxquant.batch import parse_batches
 from maxquant.cli.misc import print_and_exit
 from maxquant.maxquant import run_maxquant
 from maxquant.mqpar import read_mqpar_config
 from maxquant import version
 
+from scheduler.parser import json, sh
 
 def validate_args(args):
     if not exists(args.mqpar):
@@ -39,6 +38,7 @@ def main():
                         help='MaxQuant Commandline.exe binary')
     parser.add_argument('-p', '--custom-params')
     parser.add_argument('-o', '--output', help='Output file, default is stdout')
+    parser.add_argument('-f', '--format', choices=['json', 'sh'], default='json')
     parser.add_argument('--version', '-V', action='version', version="%(prog)s " + version.get_version())
 
     args = parser.parse_args()
@@ -61,27 +61,18 @@ def main():
         options=['-c', args.mqpar, '-D'] + custom_params
     )
 
-    batches = parse_batches(res, filepaths)
-
-    # Hackery hack for single jobs with multicore support
-    if mqpar_config['threads'] > 1:
-        for b in batches:
-            # TODO: Refactor this
-            bname = '-'.join(b['name'].split('-')[1:])
-            if bname in const.SINGLE_MULTICORE_BATCHES:
-                for j in b['jobs']:
-                    sys.stderr.write('Patching threads={threads} for job {name}\n'.format(
-                        name=j['name'],
-                        threads=mqpar_config['threads']
-                    ))
-                    j['params'] = {'num_slots': mqpar_config['threads']}
+    batches = parse_batches(res, filepaths, threads=mqpar_config['threads'])
 
     if args.output:
         f = open(args.output, 'w')
     else:
         f = sys.stdout
 
-    json.dump(batches, f, indent=2)
+    if args.format == 'json':
+        json.write_config(f, batches)
+    elif args.format == 'sh':
+        sh.write_config(f, batches)
+
     if f is not sys.stdout:
         f.close()
 
