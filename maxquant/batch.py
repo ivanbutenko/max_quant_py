@@ -60,7 +60,7 @@ class MaxQuantParser:
             for row, name in zip_longest(rows, names)
         ]
         return Batch(
-            name=name,
+            name=batch_name,
             jobs=jobs,
         )
 
