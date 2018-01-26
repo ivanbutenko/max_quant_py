@@ -19,8 +19,6 @@ def validate(args):
     for file_path in args.files:
         if not exists(file_path):
             print_and_exit('Raw file does not exist: {}'.format(file_path))
-        if not file_path.endswith('.wiff'):
-            print_and_exit('Raw file is not a wiff file {}'.format(file_path))
 
 
 def parse_set_text(set_text_args: List[str])->List[Tuple]:
