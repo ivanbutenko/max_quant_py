@@ -1,14 +1,12 @@
-import os
-import gzip
-from enum import Enum
-from typing import List, Tuple, Optional, Any, Union
 import base64
+import os
+import zlib
+from enum import Enum
+from typing import List, Tuple, Optional, Union
+
 import numpy as np
 import tqdm
 from lxml import etree
-from lxml import objectify
-from itertools import islice
-
 
 cv_count = 0
 
@@ -68,7 +66,7 @@ class Precision(Enum):
 
 class Compression(Enum):
     none = 0
-    gzip = 1
+    zlib = 1
 
 
 class BinaryDataArray:
@@ -98,14 +96,14 @@ class BinaryDataArray:
         if xpath(elem, 'ns:cvParam[@accession="MS:1000576"]'):
             compression = Compression.none
         elif xpath(elem, 'ns:cvParam[@accession="MS:1000574"]'):
-            compression = Compression.gzip
+            compression = Compression.zlib
         else:
             raise Exception('no compression cvParam')
 
         data = xpath(elem, 'ns:binary/text()')[0]
         data = base64.b64decode(data)
-        if compression == Compression.gzip:
-            data = gzip.decompress(data)
+        if compression == Compression.zlib:
+            data = zlib.decompress(data)
 
         dtype = np.dtype(np.float64 if precision is Precision.bit64 else np.float32).newbyteorder('<')
         data = np.frombuffer(data, dtype=dtype)
@@ -121,8 +119,8 @@ class BinaryDataArray:
     def update_data(self, data: np.ndarray):
         self.data = data
         data_bytes = self.data.tobytes()
-        if self.compression == Compression.gzip:
-            data_bytes = gzip.compress(data_bytes)
+        if self.compression == Compression.zlib:
+            data_bytes = zlib.compress(data_bytes)
         data_bytes = base64.b64encode(data_bytes)
 
         binary_elem = xpath(self.elem, 'ns:binary')[0]
@@ -189,6 +187,10 @@ def process_file(in_filename: str, out_filename: str, threshold_multiplier: int)
                         of.write(etree.tostring(elem).decode() + '\n')
                 elif not is_spectrum:
                     of.write(line)
+            if action == 'end':
+                element.clear()
+                while element.getprevious() is not None:
+                    del element.getparent()[0]  # clean up preceding siblings
         progress.close()
 
         print("Filtered: {} of {} peaks ({:.2f})".format(total_filtered_peaks,
