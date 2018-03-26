@@ -19,6 +19,7 @@ def get_file_actions(files: List[str])->List[Tuple]:
         (set_list, 'experiments', map(crop_name, files), 'string'),
         (set_list, 'fractions', [32767]*len(files), 'short'),
         (set_list, 'paramGroupIndices', [0]*len(files), 'int'),
+        (set_list, 'ptms', ['false']*len(files), 'boolean'),
     ]
 
 
