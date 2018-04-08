@@ -1,2 +1,2 @@
-import maxquant.cli.mzml
-maxquant.cli.mzml.main()
+import maxquant.cli.maxquant_batch
+maxquant.cli.maxquant_batch.main()

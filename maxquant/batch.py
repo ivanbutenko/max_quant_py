@@ -18,11 +18,11 @@ class MaxQuantParser:
 
     @staticmethod
     def _parse_job(batch_name: str, row: str, job_name: str, threads: int) -> JobSpec:
-        num, batch, command, arguments, wd = row
+        _num, batch, command, arguments, *_ = row
         arguments = [a.strip('"') for a in shlex.split(arguments)]
 
         if job_name is None:
-            job_name = re.sub(r'\W', '_', arguments[4])
+            job_name = re.sub(r'\W+', '_', arguments[3]).strip("_")
 
         if threads > 1:
             sys.stderr.write('Patching threads={threads} for job {name}\n'.format(
