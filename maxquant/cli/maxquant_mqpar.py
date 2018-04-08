@@ -29,6 +29,12 @@ def parse_set_text(set_text_args: List[str])->List[Tuple]:
     ]
 
 
+def add_processed_suffix(filepath: str)->str:
+    tokens = filepath.split('.')
+    tokens.insert(-1, 'processed')
+    return '.'.join(tokens)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='maxquant-mqpar',
@@ -40,6 +46,7 @@ def main():
     parser.add_argument('-o', '--output', help='Output mqpar file', default='mqpar.gen.xml')
     # parser.add_argument('-l', '--set-list', nargs='+', help='')
     parser.add_argument('-s', '--set-text', action='append', help='xpath:value')
+    parser.add_argument('--preprocess', action='store_true', help='Add preprocess step')
     parser.add_argument('--version', '-V', action='version', version="%(prog)s " + version.get_version())
 
     parser.add_argument('files', nargs='+', help='*.wiff files')
@@ -51,9 +58,16 @@ def main():
         for f in args.files
     ]
 
+
     args.output = abspath(args.output)
 
     validate(args)
+
+    if args.preprocess:
+        args.files = [
+            add_processed_suffix(f)
+            for f in args.files
+        ]
 
     actions = [
         *parse_set_text(args.set_text or []),
