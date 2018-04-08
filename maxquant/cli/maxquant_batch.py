@@ -2,6 +2,7 @@ import argparse
 import sys
 from os.path import abspath, exists, basename
 from typing import Dict, Any, List
+import shlex
 
 from maxquant.batch import parse_batches
 from maxquant.cli.misc import print_and_exit
@@ -32,23 +33,25 @@ def validate_config(config: Dict[str, Any], preprocess: bool):
         print_and_exit('FASTA database does not exist: {}'.format(config['database']))
 
 
-def _to_preprocess_job(filepath: str)->JobSpec:
+def _to_preprocess_job(filepath: str, preprocess_cmd: str)->JobSpec:
     if '.processed' not in filepath:
         # TODO: better exception message
         raise Exception("File in mqpar config not intended to be processed")
 
     from_filepath = filepath.replace(".processed", "")
     file_base = basename(from_filepath)
+    tokens = shlex.split(preprocess_cmd.format(from_filepath, filepath))
+
     return JobSpec(
         name="Process_{}".format(file_base),
-        command="mzml",
-        args=['filter', from_filepath, filepath]
+        command=tokens[0],
+        args=tokens[1:]
     )
 
 
-def add_preprocess_step_mut(batches: List[Batch], filepaths: List[str]):
+def add_preprocess_step_mut(batches: List[Batch], filepaths: List[str], preprocess_cmd: str):
     jobs = [
-        _to_preprocess_job(f)
+        _to_preprocess_job(f, preprocess_cmd)
         for f in filepaths
     ]
 
@@ -70,7 +73,7 @@ def main():
     parser.add_argument('-p', '--custom-params')
     parser.add_argument('-o', '--output', help='Output file, default is stdout')
     parser.add_argument('-f', '--format', choices=['json', 'sh'], default='json')
-    parser.add_argument('--preprocess', action='store_true', help='Add preprocess step')
+    parser.add_argument('--preprocess', default="", help='Add preprocess step. Format: --preprocess \'mxml filter {} {}\'')
     parser.add_argument('--version', '-V', action='version', version="%(prog)s " + version.get_version())
 
     args = parser.parse_args()
@@ -95,7 +98,7 @@ def main():
 
     batches = parse_batches(res, filepaths, threads=mqpar_config['threads'])
     if args.preprocess:
-        add_preprocess_step_mut(batches, filepaths)
+        add_preprocess_step_mut(batches, filepaths, args.preprocess)
 
     if args.output:
         f = open(args.output, 'w')
