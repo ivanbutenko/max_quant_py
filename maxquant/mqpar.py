@@ -1,38 +1,26 @@
-import datetime
-from os.path import basename, realpath
-from typing import List, Any, Dict
+from os.path import basename
+from typing import List, Any, Dict, Tuple
 from xml.etree import ElementTree
 
+from maxquant.xml_mod import apply, set_list
 
-def write_mqpar_config(tpl_file: str, out_file: str, files: List[str], threads: int, database: str):
-    def add_strings(node_path, values, node_type='string'):
-        node = tree.find(node_path)
-        for e in node.findall(node_type):
-            node.remove(e)
 
-        for value in values:
-            e = ElementTree.Element(node_type)
-            e.text = str(value)
-            node.append(e)
-
+def write_mqpar_config(tpl_file: str, out_file: str, actions: List[Tuple]):
     tree = ElementTree.parse(tpl_file)
-
-    comment = ElementTree.Comment('Created at {date}, base mqpar: {base_mqpar}'.format(
-        base_mqpar=realpath(tpl_file),
-        date=datetime.datetime.now(),
-    ))
-    tree.getroot().insert(0, comment)
-    tree.find('numThreads').text = str(threads)
-    add_strings('filePaths', files)
-    add_strings('experiments', [
-        basename(f)
-        for f in files
-    ])
-    add_strings('fractions', [32767]*len(files), node_type='short')
-    add_strings('paramGroupIndices', [0]*len(files), node_type='int')
-    add_strings('fastaFiles', [database], node_type='string')
-
+    apply(tree, actions)
     tree.write(out_file)
+
+
+def get_file_actions(files: List[str])->List[Tuple]:
+    def crop_name(name):
+        return basename(name).replace('.wiff', '')
+    return [
+        (set_list, 'filePaths', files, 'string'),
+        (set_list, 'experiments', map(crop_name, files), 'string'),
+        (set_list, 'fractions', [32767]*len(files), 'short'),
+        (set_list, 'paramGroupIndices', [0]*len(files), 'int'),
+        (set_list, 'ptms', ['false']*len(files), 'boolean'),
+    ]
 
 
 def read_mqpar_config(filename: str)->Dict[str, Any]:

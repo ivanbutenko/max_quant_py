@@ -1,15 +1,17 @@
 import argparse
 import sys
-import ujson as json
-from os.path import abspath, exists
-from typing import Dict, Any
+from os.path import abspath, exists, basename
+from typing import Dict, Any, List
+import shlex
 
-from maxquant import const
 from maxquant.batch import parse_batches
 from maxquant.cli.misc import print_and_exit
 from maxquant.maxquant import run_maxquant
 from maxquant.mqpar import read_mqpar_config
 from maxquant import version
+
+from scheduler.parser import json, sh
+from scheduler.job import JobSpec, Batch
 
 
 def validate_args(args):
@@ -20,13 +22,44 @@ def validate_args(args):
         print_and_exit('MaxQuant command binary {} does not exist'.format(args.max_quant_cmd))
 
 
-def validate_config(config: Dict[str, Any]):
+def validate_config(config: Dict[str, Any], preprocess: bool):
     for file_path in config['filepaths']:
+        if preprocess:
+            file_path = file_path.replace('.processed', '')
         if not exists(file_path):
             print_and_exit('Raw file does not exist: {}'.format(file_path))
 
     if not exists(config['database']):
         print_and_exit('FASTA database does not exist: {}'.format(config['database']))
+
+
+def _to_preprocess_job(filepath: str, preprocess_cmd: str)->JobSpec:
+    if '.processed' not in filepath:
+        # TODO: better exception message
+        raise Exception("File in mqpar config not intended to be processed")
+
+    from_filepath = filepath.replace(".processed", "")
+    file_base = basename(from_filepath)
+    tokens = shlex.split(preprocess_cmd.format(from_filepath, filepath))
+
+    return JobSpec(
+        name="Process_{}".format(file_base),
+        command=tokens[0],
+        args=tokens[1:]
+    )
+
+
+def add_preprocess_step_mut(batches: List[Batch], filepaths: List[str], preprocess_cmd: str):
+    jobs = [
+        _to_preprocess_job(f, preprocess_cmd)
+        for f in filepaths
+    ]
+
+    b = Batch(
+        name="Preprocess",
+        jobs=jobs
+    )
+    batches.insert(0, b)
 
 
 def main():
@@ -39,6 +72,8 @@ def main():
                         help='MaxQuant Commandline.exe binary')
     parser.add_argument('-p', '--custom-params')
     parser.add_argument('-o', '--output', help='Output file, default is stdout')
+    parser.add_argument('-f', '--format', choices=['json', 'sh'], default='json')
+    parser.add_argument('--preprocess', default="", help='Add preprocess step. Format: --preprocess \'mxml filter {} {}\'')
     parser.add_argument('--version', '-V', action='version', version="%(prog)s " + version.get_version())
 
     args = parser.parse_args()
@@ -53,7 +88,7 @@ def main():
 
     mqpar_config = read_mqpar_config(args.mqpar)
 
-    validate_config(mqpar_config)
+    validate_config(mqpar_config, preprocess=args.preprocess)
     filepaths = mqpar_config['filepaths']
 
     res = run_maxquant(
@@ -61,27 +96,20 @@ def main():
         options=['-c', args.mqpar, '-D'] + custom_params
     )
 
-    batches = parse_batches(res, filepaths)
-
-    # Hackery hack for single jobs with multicore support
-    if mqpar_config['threads'] > 1:
-        for b in batches:
-            # TODO: Refactor this
-            bname = '-'.join(b['name'].split('-')[1:])
-            if bname in const.SINGLE_MULTICORE_BATCHES:
-                for j in b['jobs']:
-                    sys.stderr.write('Patching threads={threads} for job {name}\n'.format(
-                        name=j['name'],
-                        threads=mqpar_config['threads']
-                    ))
-                    j['params'] = {'num_slots': mqpar_config['threads']}
+    batches = parse_batches(res, filepaths, threads=mqpar_config['threads'])
+    if args.preprocess:
+        add_preprocess_step_mut(batches, filepaths, args.preprocess)
 
     if args.output:
         f = open(args.output, 'w')
     else:
         f = sys.stdout
 
-    json.dump(batches, f, indent=2)
+    if args.format == 'json':
+        json.write_config(f, batches)
+    elif args.format == 'sh':
+        sh.write_config(f, batches)
+
     if f is not sys.stdout:
         f.close()
 
